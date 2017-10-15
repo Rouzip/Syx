@@ -16,15 +16,15 @@ import java.util.UUID;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private String name;    // 名字
     private UUID uid;   // 具体id
-    private Image avatar;   // 头像
+    private String name;    // 名字
+    private String avatar;   // 头像
 
 
     public User() {
     }
 
-    public User(String name, Image avatar) {
+    public User(String name, String avatar) {
         this.setName(name);
         this.setUid();
         this.setAvatar(avatar);
@@ -35,14 +35,13 @@ public class User {
     }
 
     //设置用户头像
-    public void setAvatar(Image avatar){
+    public void setAvatar(String avatar){
         this.avatar = avatar;
     }
 
     public void setUid(){
         this.uid = UUID.randomUUID();
     }
-
 
 
     public String getName() {
@@ -53,7 +52,7 @@ public class User {
         return this.uid;
     }
 
-    public Image getAvatar() {
+    public String getAvatar() {
         return avatar;
     }
 

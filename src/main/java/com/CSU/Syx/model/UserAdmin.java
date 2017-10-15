@@ -1,4 +1,4 @@
-package com.CSU.Syx.modelRepository;
+package com.CSU.Syx.model;
 
 public class UserAdmin {
     private String name;
