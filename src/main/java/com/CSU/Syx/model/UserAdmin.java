@@ -1,17 +1,12 @@
 package com.CSU.Syx.model;
 
-import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
 public class UserAdmin {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private String name;
     private String password;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    private Set<User> users = new HashSet<User>();
+    private Set<User> normalUsers = new HashSet<User>();
 
 
     public UserAdmin(String name, String password) {

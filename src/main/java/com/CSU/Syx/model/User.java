@@ -1,9 +1,6 @@
 package com.CSU.Syx.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.awt.*;
 import java.util.UUID;
 
@@ -13,13 +10,15 @@ import java.util.UUID;
 * 加入uid？但是只是用于一次性登陆，分发聊天记录
 */
 @Entity
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID uid;   // 具体id
+    @Column(nullable = false)
     private String name;    // 名字
     private String avatar;   // 头像
-
 
     public User() {
     }

@@ -1,6 +1,7 @@
 package com.CSU.Syx.model;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 /*
 * 这是为了记录消息的模型
@@ -9,10 +10,12 @@ import javax.persistence.*;
 * 转换成什么形式？
 */
 @Entity
+@Table(name = "messages")
 public class message {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @OneToOne(mappedBy = "messages")
+    private UUID messageId;
+    @OneToOne(mappedBy = "historyMessage")
     private UserFormal user;
     private String messageRecord;
 
@@ -21,8 +24,20 @@ public class message {
         this.messageRecord = "";
     }
 
+    public UUID getMessageId() {
+        return messageId;
+    }
+
     public String getMessageRecord() {
         return messageRecord;
+    }
+
+    public UserFormal getUser() {
+        return user;
+    }
+
+    public void setMessageId() {
+        this.messageId = UUID.randomUUID();
     }
 
     public void setMessageRecord(String messageRecord) {
@@ -31,5 +46,9 @@ public class message {
 
     public void appendMessageRecord(String newMessage) {
         this.messageRecord += newMessage;
+    }
+
+    public void setUser(UserFormal user) {
+        this.user = user;
     }
 }
