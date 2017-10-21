@@ -1,9 +1,6 @@
 package com.CSU.Syx.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 import java.util.UUID;
 
@@ -13,7 +10,7 @@ import java.util.UUID;
 * 加入email，预想是发送注册邮件，确认本人注册
 */
 @Entity
-public class UserFormal {
+public class UserFormal extends User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID uid;   // 具体id
@@ -21,8 +18,14 @@ public class UserFormal {
     private String avatar;   // 头像
     private String password;    //用户使用的密码
     private String email;   // 邮件地址
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "history_message")
+    private message historyMessage;    // 历史消息
+    @ManyToOne
+    @JoinColumn(name = "admin")
+    private UserAdmin admin;    // 客服
 
-    public UserFormal(String name, String avatar,String password, String email){
+    public UserFormal(String name, String avatar, String password, String email) {
         this.setName(name);
         this.setAvatar(avatar);
         this.setPassword(password);
@@ -31,47 +34,78 @@ public class UserFormal {
     }
 
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
+    @Override
     public String getName() {
         return this.name;
     }
 
+    @Override
     public String getAvatar() {
-        return avatar;
+        return this.avatar;
     }
 
+    @Override
     public UUID getUid() {
         return this.uid;
     }
 
-    public void setPassword(String password){
-        this.password=password;
+    public UserAdmin getAdmin() {
+        return this.admin;
     }
 
-    public void setEmail(String email){
+    public message getHistoryMessage() {
+        // 我在这里使用了historyMessage但是IDE提示并没有使用，可能有bug我没发现？
+        return this.historyMessage;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setEmail(String email) {
         this.email = email;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setUid(){
+    @Override
+    public void setUid() {
         this.uid = UUID.randomUUID();
     }
 
+    @Override
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
 
-    public boolean RoleCheck(){
+    public void setAdmin(UserAdmin admin) {
+        this.admin = admin;
+    }
+
+    public void addMessage(String newMessage) {
+        // 这里也使用了
+        this.historyMessage.appendMessageRecord(newMessage);
+    }
+
+    @Override
+    public boolean userCheck() {
         // 对于正式用户，返回true
         return true;
+    }
+
+    @Override
+    public boolean roleCheck() {
+        // 检查是否是客服
+        return false;
     }
 }

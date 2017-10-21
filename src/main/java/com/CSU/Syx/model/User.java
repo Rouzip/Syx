@@ -56,9 +56,13 @@ public class User {
         return avatar;
     }
 
-    public boolean RoleCheck(){
+    public boolean userCheck(){
         // 检查是否是正式用户
         return false;
     }
 
+    public boolean roleCheck(){
+        // 检查是否是客服
+        return false;
+    }
 }
