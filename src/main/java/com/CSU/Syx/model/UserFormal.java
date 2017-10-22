@@ -13,7 +13,6 @@ import java.util.UUID;
 @Table(name = "user_formal")
 public class UserFormal extends User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID uid;   // 具体id
     @Column(nullable = false)
     private String name;    // 名字

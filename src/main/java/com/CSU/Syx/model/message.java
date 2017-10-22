@@ -13,7 +13,6 @@ import java.util.UUID;
 @Table(name = "messages")
 public class message {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID messageId;
     @OneToOne(mappedBy = "historyMessage")
     private UserFormal user;

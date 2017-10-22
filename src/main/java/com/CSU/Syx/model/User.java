@@ -10,11 +10,10 @@ import java.util.UUID;
 * 加入uid？但是只是用于一次性登陆，分发聊天记录
 */
 @Entity
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID uid;   // 具体id
     @Column(nullable = false)
     private String name;    // 名字
