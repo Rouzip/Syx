@@ -1,4 +1,4 @@
 package com.CSU.Syx.modelRepository;
 
-public interface UserRepository {
+public interface RoleRepository {
 }
