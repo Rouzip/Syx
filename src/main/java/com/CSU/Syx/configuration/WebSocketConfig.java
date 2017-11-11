@@ -9,13 +9,16 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
-
+/**
+ * @author Rouzip
+ * @date 2017.11.8
+ */
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(myHandler(), "/as").setAllowedOrigins("*");
+        registry.addHandler(myHandler(), "/ws").setAllowedOrigins("*");
     }
 
     @Bean

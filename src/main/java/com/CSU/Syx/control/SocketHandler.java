@@ -7,6 +7,10 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 
+/**
+ * @author Rouzip
+ * @date 2017.11.6
+ */
 @Component
 public class SocketHandler extends TextWebSocketHandler {
     @Override
@@ -19,4 +23,5 @@ public class SocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         session.sendMessage(new TextMessage("Hello"));
     }
+
 }
