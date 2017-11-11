@@ -1,7 +1,6 @@
 package com.CSU.Syx.model;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 import javax.persistence.*;
 
@@ -17,8 +16,7 @@ public class Role {
     @Id
     private Long uid;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST})
-    @JoinColumn(name = "user_id")
+    @ManyToOne(cascade = {CascadeType.ALL})
     private User user;
     private String role;
 }

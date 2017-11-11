@@ -18,8 +18,7 @@ public class Message {
 
 
     private Date date;
-    @ManyToOne(cascade = {CascadeType.PERSIST})
-    @JoinColumn(name = "user_id")
+    @ManyToOne(cascade = {CascadeType.ALL})
     private User user;
     private String message;
 }

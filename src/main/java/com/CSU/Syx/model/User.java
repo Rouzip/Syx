@@ -22,8 +22,8 @@ public class User {
     private String name;
     private String password;
     private String email;
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "users")
-    private Set<String> roles;
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "users")
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "user")
+    private Set<Role> roles;
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "user")
     private Set<Message> messages;
 }
