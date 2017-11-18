@@ -6,11 +6,9 @@ import javax.persistence.*;
 import java.util.Set;
 
 /**
+ * 标准用户模型，role自己添加，admin提前写死
  * @author Rouzip
  * @date 2017.11.5
- * 默认用户模型，用于匿名用户登录
- * 此处不保存聊天记录，没有任何权限
- * 加入uid？但是只是用于一次性登陆，分发聊天记录
  */
 @Data
 @Entity

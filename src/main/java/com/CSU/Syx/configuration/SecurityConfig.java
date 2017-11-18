@@ -16,6 +16,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
                 .authorizeRequests()
                 // 静态资源全部允许，首页允许，websocket允许通过
                     .antMatchers("/**", "/static/**", "/index","/ws").permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated().and()
+                .csrf().disable();
     }
 }

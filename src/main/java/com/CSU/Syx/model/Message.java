@@ -16,7 +16,6 @@ public class Message {
     @Id
     private Long id;
 
-
     private Date date;
     @ManyToOne(cascade = {CascadeType.ALL})
     private User user;
