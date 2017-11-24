@@ -19,4 +19,8 @@ public class Role {
     @ManyToOne(cascade = {CascadeType.ALL})
     private User user;
     private String role;
+
+    public String getRole(){
+        return this.role;
+    }
 }

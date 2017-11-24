@@ -8,5 +8,6 @@ public interface UserRepository extends CrudRepository<User, Long> {
      * 通过名字查询
      * @return
      */
-    public User findUsersByName(String name);
+    public User findUserByName(String name);
+    public User findUserById(String id);
 }

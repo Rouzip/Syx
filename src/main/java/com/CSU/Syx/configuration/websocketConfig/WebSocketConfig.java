@@ -1,7 +1,9 @@
 package com.CSU.Syx.configuration.websocketConfig;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
@@ -16,7 +18,8 @@ import javax.annotation.Resource;
 @EnableWebSocket
 public class WebSocketConfig extends WebMvcConfigurerAdapter implements WebSocketConfigurer {
     @Resource
-    SocketHandler handler;
+    private SocketHandler myHandler;
+
 
     /**
      * 在指定的位置注册自己的握手方法
@@ -24,6 +27,6 @@ public class WebSocketConfig extends WebMvcConfigurerAdapter implements WebSocke
      */
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
-        webSocketHandlerRegistry.addHandler(handler,"/ws").addInterceptors(new HandShake());
+        webSocketHandlerRegistry.addHandler(myHandler,"/ws").addInterceptors(new HandShake()).setAllowedOrigins("*");
     }
 }

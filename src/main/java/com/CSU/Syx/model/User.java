@@ -1,6 +1,7 @@
 package com.CSU.Syx.model;
 
 import lombok.Data;
+import lombok.Getter;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -11,12 +12,12 @@ import java.util.Set;
  * @date 2017.11.5
  */
 @Data
+@Getter
 @Entity
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private String id;
     private String name;
     private String password;
     private String email;
@@ -24,4 +25,8 @@ public class User {
     private Set<Role> roles;
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "user")
     private Set<Message> messages;
+
+    public Set<Role> getRoles(){
+        return this.roles;
+    }
 }
