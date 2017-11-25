@@ -25,6 +25,7 @@ Content-Type: application/json; charset=utf-8
 | :------- | :--- | :----- | ---- |
 | username | 是    | String | 用户名  |
 | password | 是    | String | 密码   |
+| email    | 是    | String | 邮箱   |
 
 ### 响应参数
 | 参数名  | 必选   | 类型     | 说明                  |
@@ -43,6 +44,7 @@ Content-Type: application/json; charset=utf-8
 {
   "username": "Equim",
   "password": "さやか-大好きです！",
+  "email":"123456789@gmail.com"
 }
 ```
 __响应__
@@ -107,7 +109,7 @@ Content-Type: application/json; charset=utf-8
 ```
 
 ## 鉴权窗口
-该 API 提供一个根据客户端请求头的`Cookie`字段来鉴权的方法，返回该用户身份的有效性及相关权限等。
+该 API 提供一个根据客户端请求头的`Cookie`字段来鉴权的方法，返回该用户身份的有效性及相关权限等。(rememberme)
 
 ### 请求头
 ```plain
@@ -149,93 +151,12 @@ Content-Type: application/json; charset=utf-8
 }
 ```
 
-## 申请文件上传
-鉴于 WebSocket 的特性，其不适合用作上传，因此我们使用了另一个信道来处理文件特性。
-
-该 API 实现对文件上传的申请。
-
-TODO: 是否限制该功能仅限已登录用户？
-
-### 请求头
-```plain
-POST /api/upload HTTP/1.1
-Accept: application/json
-Content-Type: application/json; charset=utf-8
-```
-Body 为空。
-
-### 响应参数
-| 参数名  | 必选   | 类型     | 说明                       |
-| :--- | :--- | :----- | ------------------------ |
-| msg  | 否    | String | 错误的原因                    |
-| rid  | 否    | String | 如果没有发生错误，那么该字段为申请到的资源 ID |
-
-### 示例
-__请求__
-```plain
-POST /api/upload/ HTTP/1.1
-Accept: application/json
-Content-Type: application/json; charset=utf-8
-```
-Body 为空。
-
-__响应__
-```plain
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-```
-```js
-{
-  "rid": "xxxxxabcd"
-}
-```
-
-## 文件上传
-该 API 实现文件的上传，目前仅允许单文件上传。
-
-### 请求头
-```plain
-PUT /api/upload/:rid HTTP/1.1
-Accept: application/json
-Content-Type: multipart/form-data; boundary=—-WebKitFormBoundaryxxxxxxxxxxxxxxxx
-```
-rid 代表一个资源 ID，通过“申请文件上传”获取。
-
-### 响应参数
-| 参数名  | 必选   | 类型     | 说明    |
-| :--- | :--- | :----- | ----- |
-| msg  | 否    | String | 错误的原因 |
-
-### 示例
-__请求__
-```plain
-PUT /api/upload/4knCvz086A0 HTTP/1.1
-Accept: application/json
-Content-Type: multipart/form-data; boundary=—-WebKitFormBoundarypHkhXOMllLo8SW36
-```
-```plain
-------WebKitFormBoundarypHkhXOMllLo8SW36
-Content-Disposition: form-data; name="file"; filename="QQ截图.jpg"
-Content-Type: image/jpeg
+## 消息记录
 
 
-------WebKitFormBoundarypHkhXOMllLo8SW36--
-
-# (略)
-```
-
-__响应__
-```plain
-HTTP/1.1 403 Forbidden
-Content-Type: application/json; charset=utf-8
-```
-```js
-{
-  "msg": "无效的资源 ID。"
-}
-```
 
 # API 文档 (WebSocket)
+
 所有的 WebSocket 过程必须遵循 [RFC 6455](https://tools.ietf.org/html/rfc6455) 规范。
 
 应用层面，所有的 WebSocket 帧必须为 JSON 字符串，若一方发送的帧不符合 JSON 格式，接收方有权直接断开连接。
@@ -339,11 +260,6 @@ admin必须第一个登陆，然后确定它的uid才能方便之后的各个信
 
 
 
+匿名用户向服务器请求uid，返回新的uid，登陆用户从数据库里面获取uid，admin写死uid
 
-现在匿名用户向服务器请求uid，然后服务器会记录uid，返回它的uid和admin的uid，如果admin未登录，false
-
-登陆用户向服务器请求uid，服务器记录uid，返回它的uid和admin的uid，如果admin未登录，false
-
-admin向服务器请求uid，服务器记录uid，返回它的uid
-
-在map1之中添加“”random
+匿名用户获取uid

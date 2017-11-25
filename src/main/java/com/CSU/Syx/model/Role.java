@@ -14,13 +14,22 @@ import javax.persistence.*;
 @Table(name = "roles")
 public class Role {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long uid;
 
     @ManyToOne(cascade = {CascadeType.ALL})
     private User user;
     private String role;
 
-    public String getRole(){
+    public String getRole() {
         return this.role;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setRole(String role){
+        this.role = role;
     }
 }

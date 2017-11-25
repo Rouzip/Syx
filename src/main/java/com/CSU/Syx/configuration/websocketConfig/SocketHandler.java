@@ -64,10 +64,10 @@ public class SocketHandler implements WebSocketHandler {
             userSessionMap.put(uid, webSocketSession);
         }
         // 查看是否是匿名用户
-        boolean ifAnonymous = "".equals(user.getName());
-        if (!ifAnonymous) {
-            NameToUid.put(user.getName(), uid);
-        } else {
+        try {
+            String name = user.getName();
+            NameToUid.put(name, uid);
+        } catch (NullPointerException e) {
             NameToUid.put("匿名用户" + uid, uid);
         }
     }
