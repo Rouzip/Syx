@@ -16,4 +16,16 @@ public class MessageTrans {
     public String getToName(){
         return this.toName;
     }
+
+    public String getFromName(){
+        return this.fromName;
+    }
+
+    public String getText(){
+        return this.text;
+    }
+
+    public Date getTime(){
+        return this.time;
+    }
 }

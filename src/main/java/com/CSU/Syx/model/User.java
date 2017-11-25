@@ -21,12 +21,15 @@ public class User {
     private String name;
     private String password;
     private String email;
+
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "user")
     private Set<Role> roles;
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "user")
-    private Set<Message> messages;
 
     public Set<Role> getRoles(){
         return this.roles;
+    }
+
+    public String getName(){
+        return this.name;
     }
 }

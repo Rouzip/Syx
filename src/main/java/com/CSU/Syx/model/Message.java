@@ -17,7 +17,23 @@ public class Message {
     private Long id;
 
     private Date date;
-    @ManyToOne(cascade = {CascadeType.ALL})
-    private User user;
+    private String toName;
+    private String fromName;
     private String message;
+
+    public void setDate(Date time){
+        this.date = time;
+    }
+
+    public void setToName(String name){
+        this.toName = name;
+    }
+
+    public void setFromName(String name){
+        this.fromName = name;
+    }
+
+    public void setMessage(String message){
+        this.message = message;
+    }
 }

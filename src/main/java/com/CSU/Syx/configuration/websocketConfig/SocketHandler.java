@@ -1,16 +1,18 @@
 package com.CSU.Syx.configuration.websocketConfig;
 
+import com.CSU.Syx.modelRepository.MessageRepository;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-import com.CSU.Syx.model.Role;
+import com.CSU.Syx.model.Message;
 import com.CSU.Syx.model.User;
 import com.CSU.Syx.modelRepository.UserRepository;
 
@@ -27,6 +29,9 @@ public class SocketHandler implements WebSocketHandler {
      */
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MessageRepository messageRepository;
 
     /**
      * 记录uid和session对应的map，权限是写死在数据库之中的
@@ -59,12 +64,11 @@ public class SocketHandler implements WebSocketHandler {
             userSessionMap.put(uid, webSocketSession);
         }
         // 查看是否是匿名用户
-        boolean ifAnonymous = user.getName().equals("");
-        if (!ifAnonymous){
-            NameToUid.put(user.getName(),uid);
-        }
-        else {
-            NameToUid.put("匿名用户"+uid,uid);
+        boolean ifAnonymous = "".equals(user.getName());
+        if (!ifAnonymous) {
+            NameToUid.put(user.getName(), uid);
+        } else {
+            NameToUid.put("匿名用户" + uid, uid);
         }
     }
 
@@ -86,8 +90,8 @@ public class SocketHandler implements WebSocketHandler {
                 String uid = (String) entry.getKey();
                 userSessionMap.remove(uid);
                 // 从name 和 uid映射中删除
-                for(Map.Entry e:NameToUid.entrySet()){
-                    if(uid.equals(e.getValue())){
+                for (Map.Entry e : NameToUid.entrySet()) {
+                    if (uid.equals(e.getValue())) {
                         NameToUid.remove(e.getKey());
                     }
                 }
@@ -99,7 +103,6 @@ public class SocketHandler implements WebSocketHandler {
 
     /**
      * 处理发送的消息，并将其发送给对应的人
-     * TODO：对于对应的消息格式，根据to和from发送给制定的人，并将消息存储在数据库
      *
      * @param webSocketSession 用户对应的webSocket session
      * @param webSocketMessage 发送的信息
@@ -110,11 +113,24 @@ public class SocketHandler implements WebSocketHandler {
         if (webSocketMessage.getPayloadLength() == 0) {
             return;
         }
-        String text = webSocketMessage.getPayload().toString();
-        MessageTrans msg = new Gson().fromJson(text, MessageTrans.class);
-        String toUser = msg.getToName();
-        String uid = NameToUid.get(toUser);
-        this.sendMessageToUser(uid,new TextMessage(text));
+        String originText = webSocketMessage.getPayload().toString();
+        // 解码消息记录
+        MessageTrans msg = new Gson().fromJson(originText, MessageTrans.class);
+        User fromUser = userRepository.findUserByName(msg.getFromName());
+        User toUser = userRepository.findUserByName(msg.getToName());
+        String text = msg.getText();
+        Date date = msg.getTime();
+        // 构建存储的聊天记录
+        Message history = new Message();
+        history.setDate(date);
+        history.setFromName(fromUser.getName());
+        history.setToName(toUser.getName());
+        history.setMessage(text);
+        messageRepository.save(history);
+        // 将消息发送到相对应的用户那里
+        String toUid = NameToUid.get(toUser.getName());
+        TextMessage textMessage = new TextMessage(new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(msg));
+        this.sendMessageToUser(toUid, textMessage);
     }
 
     /**
