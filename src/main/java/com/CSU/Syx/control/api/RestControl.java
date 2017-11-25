@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import com.CSU.Syx.model.User;
 import com.CSU.Syx.modelRepository.UserRepository;
 
-import javax.validation.constraints.Null;
-
 import static com.CSU.Syx.configuration.websocketConfig.SocketHandler.NameToUid;
 
 
@@ -31,7 +29,7 @@ public class RestControl {
      * TODO：添加鉴权
      * @return
      */
-    @GetMapping("/list")
+    @GetMapping("/userlist")
     public Map userList() {
         return NameToUid;
     }
@@ -79,27 +77,25 @@ public class RestControl {
         return response;
     }
 
-    /**
-     * TODO：登陆用户，返回UUID和isAdmin
-     * @return 返回结果列表
-     */
-    public Map login(){
-
-    }
-
-    /**
-     * TODO：退出登陆，从列表之中删除
-     */
-    public void logout(){
-
-    }
-
-    /**
-     * TODO：鉴权
-     */
-    public Map auth(){
-
-    }
-
-    public void
+//    /**
+//     * TODO：登陆用户，返回UUID和isAdmin
+//     * @return 返回结果列表
+//     */
+//    public Map login(){
+//
+//    }
+//
+//    /**
+//     * TODO：退出登陆，从列表之中删除
+//     */
+//    public void logout(){
+//
+//    }
+//
+//    /**
+//     * TODO：鉴权
+//     */
+//    public Map auth(){
+//
+//    }
 }

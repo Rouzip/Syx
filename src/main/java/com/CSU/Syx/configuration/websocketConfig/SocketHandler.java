@@ -8,9 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.CSU.Syx.model.Message;
 import com.CSU.Syx.model.User;
@@ -42,10 +40,15 @@ public class SocketHandler implements WebSocketHandler {
      */
     public static Map<String, String> NameToUid;
 
+    private static User admin;
+
     // 静态初始化两个map
     static {
         userSessionMap = new HashMap<>(1024);
         NameToUid = new HashMap<>(1024);
+        admin.setId(UUID.randomUUID().toString());
+        Set roles = new HashSet();
+
     }
 
     /**
