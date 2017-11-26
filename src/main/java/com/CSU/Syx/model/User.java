@@ -4,8 +4,6 @@ import lombok.Data;
 import lombok.Getter;
 
 import javax.persistence.*;
-import javax.print.DocFlavor;
-import java.util.Set;
 
 /**
  * 标准用户模型，role自己添加，admin提前写死
@@ -23,24 +21,34 @@ public class User {
     private String name;
     private String password;
     private String email;
+    private String role;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    private Set<Role> roles;
+    public User(){
 
-    public Set<Role> getRoles() {
-        return this.roles;
+    }
+
+    public User(String id, String name, String password, String email, String role) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
+        this.email = email;
+        this.role = role;
     }
 
     public String getName() {
         return this.name;
     }
 
+    public String getRole() {
+        return this.role;
+    }
+
     public void setEmail(String email) {
         this.email = email;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public void setName(String name) {

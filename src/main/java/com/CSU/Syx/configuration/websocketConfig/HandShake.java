@@ -39,20 +39,6 @@ public class HandShake implements HandshakeInterceptor {
      */
     @Override
     public boolean beforeHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, Map<String, Object> map) throws Exception {
-        if (serverHttpRequest instanceof ServletServerHttpRequest) {
-            ServletServerHttpRequest servletServerHttpRequest = (ServletServerHttpRequest) serverHttpRequest;
-            HttpSession session = servletServerHttpRequest.getServletRequest().getSession(false);
-            // 标记用户
-
-            try{
-                String uid = (String) session.getAttribute("uid");
-                map.put("uid",uid);
-            } catch (NullPointerException e){
-                String uid = UUID.randomUUID().toString();
-                map.put("uid",uid);
-            }
-        }
-        // 继续握手
         return true;
     }
 

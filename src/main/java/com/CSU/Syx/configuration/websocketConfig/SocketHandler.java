@@ -40,15 +40,16 @@ public class SocketHandler implements WebSocketHandler {
      */
     public static Map<String, String> NameToUid;
 
-    private static User admin;
+    private static User admin = new User("4c4b716b-dbc3-47fe-b750-95dfee776647",
+            "admin",
+            "123",
+            "rouzipking@gamil.com",
+            "admin");
 
     // 静态初始化两个map
     static {
         userSessionMap = new HashMap<>(1024);
         NameToUid = new HashMap<>(1024);
-        admin.setId(UUID.randomUUID().toString());
-        Set roles = new HashSet();
-
     }
 
     /**
@@ -60,17 +61,15 @@ public class SocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
         String uid = (String) webSocketSession.getAttributes().get("uid");
+        // 从数据库进行检索，后边异常是针对匿名用户的
         User user = userRepository.findUserById(uid);
-        // 查看用户是否在线，建立uid和session的映射
-        boolean ifExist = userSessionMap.get(uid) == null;
-        if (ifExist) {
-            userSessionMap.put(uid, webSocketSession);
-        }
-        // 查看是否是匿名用户
+        // 正常用户可以获得名字，匿名用户抛出异常单独设置名字
         try {
             String name = user.getName();
+            userSessionMap.put(uid,webSocketSession);
             NameToUid.put(name, uid);
         } catch (NullPointerException e) {
+            userSessionMap.put(uid,webSocketSession);
             NameToUid.put("匿名用户" + uid, uid);
         }
     }
@@ -119,10 +118,10 @@ public class SocketHandler implements WebSocketHandler {
         String originText = webSocketMessage.getPayload().toString();
         // 解码消息记录
         MessageTrans msg = new Gson().fromJson(originText, MessageTrans.class);
-        User fromUser = userRepository.findUserByName(msg.getFromName());
-        User toUser = userRepository.findUserByName(msg.getToName());
+        User fromUser = userRepository.findUserById(msg.getFromName());
+        User toUser = userRepository.findUserById(msg.getToName());
         String text = msg.getText();
-        Date date = msg.getTime();
+        Date date = new Date();
         // 构建存储的聊天记录
         Message history = new Message();
         history.setDate(date);
@@ -145,9 +144,20 @@ public class SocketHandler implements WebSocketHandler {
      */
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
-        for (String key : userSessionMap.keySet()) {
-            userSessionMap.remove(key);
-            break;
+        // 从uid 和 session映射中删除
+        for (Map.Entry entry : userSessionMap.entrySet()) {
+            if (webSocketSession.equals(entry.getValue())) {
+                String uid = (String) entry.getKey();
+                userSessionMap.remove(uid);
+                // 从name 和 uid映射中删除
+                for (Map.Entry e : NameToUid.entrySet()) {
+                    if (uid.equals(e.getValue())) {
+                        NameToUid.remove(e.getKey());
+                    }
+                }
+                System.out.println("remove the session in the map");
+                break;
+            }
         }
         webSocketSession.close();
     }

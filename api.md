@@ -262,4 +262,20 @@ admin必须第一个登陆，然后确定它的uid才能方便之后的各个信
 
 匿名用户向服务器请求uid，返回新的uid，登陆用户从数据库里面获取uid，admin写死uid
 
-匿名用户获取uid
+匿名用户获取uid，登陆用户获取uid，admin获取自己uid都是通过登陆（登陆用户可以通过注册
+
+通过获取列表获得别人的uid和name
+
+后台维护的三个列表的作用
+
+```js
+userSessionMap：uid和websocketsession的对应关系
+NameToUid：name和uid的对应关系
+alives：仅维护已经登陆的人的cookie
+```
+
+userSessionMap：每次建立连接会被增加到这里面，断开连接就从里面删除
+
+NameToUid：与userSessionMap同时进行维护，建立连接的时候添加到这里面
+
+alives：每次signup或者login时候添加，logout删除
