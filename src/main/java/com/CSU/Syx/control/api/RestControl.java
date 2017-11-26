@@ -205,14 +205,16 @@ public class RestControl {
                 if (userName.equals("admin")){
                     response.put("isAdmin",true);
                     response.put("username","admin");
+                    return response;
                 }
                 else {
                     response.put("isAdmin",false);
                     response.put("username",userName);
+                    return response;
                 }
             }
         }
-        response.put("lsLogged",false);
+        response.put("isLogged",false);
         return response;
     }
 }
