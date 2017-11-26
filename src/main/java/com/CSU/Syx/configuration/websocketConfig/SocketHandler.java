@@ -40,7 +40,7 @@ public class SocketHandler implements WebSocketHandler {
      */
     public static Map<String, String> NameToUid;
 
-    private static User admin = new User("4c4b716b-dbc3-47fe-b750-95dfee776647",
+    public static User admin = new User("4c4b716b-dbc3-47fe-b750-95dfee776647",
             "admin",
             "123",
             "rouzipking@gamil.com",
@@ -67,10 +67,8 @@ public class SocketHandler implements WebSocketHandler {
         try {
             String name = user.getName();
             userSessionMap.put(uid,webSocketSession);
-            NameToUid.put(name, uid);
         } catch (NullPointerException e) {
             userSessionMap.put(uid,webSocketSession);
-            NameToUid.put("匿名用户" + uid, uid);
         }
     }
 

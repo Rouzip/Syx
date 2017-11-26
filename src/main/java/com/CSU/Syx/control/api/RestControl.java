@@ -1,6 +1,7 @@
 package com.CSU.Syx.control.api;
 
 import java.util.*;
+import javax.print.attribute.standard.MediaSize;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,8 +24,10 @@ import static com.CSU.Syx.configuration.websocketConfig.SocketHandler.admin;
 @RestController
 @RequestMapping("/api")
 public class RestControl {
-    // 用来储存cookie
-    private static Map<String,String> alives = new HashMap<>();
+    /**
+     * 用来储存cookie
+     */
+    private static Map<String, String> alives = new HashMap<>();
     private String adminCookie;
 
     @Autowired
@@ -36,20 +39,26 @@ public class RestControl {
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
+     * 鉴权之后返回对应的列表
      * 管理员权限，使用cookie来进行鉴权，写死在代码里
-     * TODO：添加鉴权
      *
      * @return Map name uid列表
      */
     @GetMapping("/userlist")
     public Map userList(@CookieValue(value = "auth", defaultValue = "null") String auth) {
-        Map list = new HashMap();
+        Map userList = new HashMap();
         if (auth == adminCookie) {
+            // 如果是admin，返回的列表没有自己
             for (Map.Entry entry : NameToUid.entrySet()) {
-                if (entry.getKey())
+                if (entry.getKey() != "admin") {
+                    userList.put(entry.getKey(), entry.getValue());
+                }
             }
+        } else {
+            // 如果是普通用户，返回的只有admin和其uuid
+            userList.put("admin", admin.getId());
         }
-        return NameToUid;
+        return userList;
     }
 
     /**
@@ -94,10 +103,11 @@ public class RestControl {
             // 将数据存入数据库
             userRepository.save(newUser);
             String cookeValue = UUID.randomUUID().toString();
-            alives.put(userName,cookeValue);
+            alives.put(userName, cookeValue);
             Cookie cookie = new Cookie("auth", cookeValue);
             cookie.setPath("/");
             httpServletResponse.addCookie(cookie);
+            NameToUid.put(userName, uuid);
         }
         response.put("isAdmin", false);
         return response;
@@ -127,12 +137,14 @@ public class RestControl {
                     Cookie cookie = new Cookie("auth", cookieValue);
                     adminCookie = cookieValue;
                     httpServletResponse.addCookie(cookie);
+                    NameToUid.put("admin", admin.getId());
                 } else {
                     response.put("isAdmin", false);
                     String cookieValue = UUID.randomUUID().toString();
                     Cookie cookie = new Cookie("auth", cookieValue);
-                    alives.put(user.getName(),cookieValue);
+                    alives.put(user.getName(), cookieValue);
                     httpServletResponse.addCookie(cookie);
+                    NameToUid.put(user.getName(), user.getId());
                 }
             } else {
                 response.put("msg", "密码错误");
@@ -144,20 +156,20 @@ public class RestControl {
     }
 
     /**
-     * TODO：退出登陆，从列表之中删除(不知道是否断开连接)
+     * 退出登陆，从列表之中删除，是否断开连接前端决定
      */
     @GetMapping("/logout")
     public void logout(@CookieValue(value = "auth", defaultValue = "null") String cookie) {
-        for (String tmp : alives) {
-            if (tmp == cookie) {
-                alives.remove(tmp);
+        for(Map.Entry entry:alives.entrySet()){
+            if(cookie == entry.getValue()){
+                alives.remove(entry.getKey());
+                NameToUid.remove(entry.getKey());
             }
         }
-
     }
 
 //    /**
-//     * TODO：鉴权
+//     * TODO：鉴权，即实现rememberme功能
 //     */
 //    public Map auth(){
 //
