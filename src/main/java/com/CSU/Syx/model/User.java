@@ -35,6 +35,14 @@ public class User {
         this.role = role;
     }
 
+    public String getId(){
+        return this.id;
+    }
+
+    public String getPassword(){
+        return this.password;
+    }
+
     public String getName() {
         return this.name;
     }

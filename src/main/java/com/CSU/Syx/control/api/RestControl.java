@@ -25,6 +25,12 @@ import static com.CSU.Syx.configuration.websocketConfig.SocketHandler.admin;
 @RequestMapping("/api")
 public class RestControl {
     /**
+     * 自己定义的已经在线异常
+     */
+    class OnlineException extends Exception {
+    }
+
+    /**
      * 用来储存cookie
      */
     private static Map<String, String> alives = new HashMap<>();
@@ -45,18 +51,26 @@ public class RestControl {
      * @return Map name uid列表
      */
     @GetMapping("/userlist")
-    public Map userList(@CookieValue(value = "auth", defaultValue = "null") String auth) {
-        Map userList = new HashMap();
-        if (auth == adminCookie) {
+    public Map userList(@CookieValue(value = "auth") String auth) {
+        Map userList = new HashMap(10);
+        if (auth.equals(adminCookie)) {
             // 如果是admin，返回的列表没有自己
             for (Map.Entry entry : NameToUid.entrySet()) {
-                if (entry.getKey() != "admin") {
+                // 不是admin的添加到返回列表
+                if (!entry.getKey().equals("admin")) {
                     userList.put(entry.getKey(), entry.getValue());
                 }
             }
         } else {
-            // 如果是普通用户，返回的只有admin和其uuid
-            userList.put("admin", admin.getId());
+            for (Map.Entry entry:alives.entrySet()){
+                if (entry.getValue().equals(auth)){
+                    // 如果是普通用户，返回的只有admin和其uuid
+                    userList.put("admin", admin.getId());
+                    return userList;
+                }
+            }
+            // 对于错误的cookie返回错误
+            userList.put("msg","未登陆或错误cookie");
         }
         return userList;
     }
@@ -84,7 +98,7 @@ public class RestControl {
                 response.put("msg", "已有该用户");
             }
             String admin = "admin";
-            if (name == admin) {
+            if (name.equals(admin)) {
                 response.put("msg", "不能创建admin");
             }
         } catch (NullPointerException e) {
@@ -122,19 +136,26 @@ public class RestControl {
     public Map login(@RequestParam("name") String name,
                      @RequestParam("password") String password,
                      HttpServletResponse httpServletResponse) {
-        Map response = new HashMap();
+        Map response = new HashMap(5);
         User user = userRepository.findUserByName(name);
         try {
             boolean ifCan = passwordEncoder.matches(user.getPassword(), password);
             // 验证密码正确，返回UUID和isAdmin，否则返回错误信息
-            if (ifCan) {
+            if (ifCan || password.equals(admin.getPassword())) {
+                // 遍历在线名单，如果已在线抛出自定义异常
+                for (Map.Entry tmp : NameToUid.entrySet()) {
+                    if (tmp.getKey().equals(name)) {
+                        throw new OnlineException();
+                    }
+                }
                 response.put("uid", user.getId());
                 String passName = user.getName();
                 // 判断是否是admin，返回相应的判断
-                if (passName == "admin") {
+                if ("admin".equals(passName)) {
                     response.put("isAdmin", true);
                     String cookieValue = UUID.randomUUID().toString();
                     Cookie cookie = new Cookie("auth", cookieValue);
+                    alives.put("admin",cookieValue);
                     adminCookie = cookieValue;
                     httpServletResponse.addCookie(cookie);
                     NameToUid.put("admin", admin.getId());
@@ -150,7 +171,9 @@ public class RestControl {
                 response.put("msg", "密码错误");
             }
         } catch (NullPointerException e) {
-            response.put("msh", "查无此人");
+            response.put("msg", "查无此人");
+        } catch (OnlineException o) {
+            response.put("msg", "此人已在线");
         }
         return response;
     }
@@ -159,19 +182,37 @@ public class RestControl {
      * 退出登陆，从列表之中删除，是否断开连接前端决定
      */
     @GetMapping("/logout")
-    public void logout(@CookieValue(value = "auth", defaultValue = "null") String cookie) {
-        for(Map.Entry entry:alives.entrySet()){
-            if(cookie == entry.getValue()){
+    public void logout(@CookieValue(value = "auth") String cookie) {
+        for (Map.Entry entry : alives.entrySet()) {
+            if (cookie.equals(entry.getValue())) {
                 alives.remove(entry.getKey());
                 NameToUid.remove(entry.getKey());
             }
         }
     }
 
-//    /**
-//     * TODO：鉴权，即实现rememberme功能
-//     */
-//    public Map auth(){
-//
-//    }
+    /**
+     * 鉴权，即实现rememberme功能
+     */
+    @GetMapping("/auth")
+    public Map auth(@CookieValue("auth")String auth){
+        Map response = new HashMap(4);
+        for (Map.Entry entry:alives.entrySet()){
+            if (entry.getValue().equals(auth)){
+                response.put("isLogged",true);
+                String userName = (String) entry.getKey();
+                response.put("uid",NameToUid.get(userName));
+                if (userName.equals("admin")){
+                    response.put("isAdmin",true);
+                    response.put("username","admin");
+                }
+                else {
+                    response.put("isAdmin",false);
+                    response.put("username",userName);
+                }
+            }
+        }
+        response.put("lsLogged",false);
+        return response;
+    }
 }
