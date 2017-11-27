@@ -21,19 +21,25 @@ public class Message {
     private String fromName;
     private String message;
 
-    public void setDate(Date time){
+    public void setDate(Date time) {
         this.date = time;
     }
 
-    public void setToName(String name){
+    public void setToName(String name) {
         this.toName = name;
     }
 
-    public void setFromName(String name){
+    public void setFromName(String name) {
         this.fromName = name;
     }
 
-    public void setMessage(String message){
+    public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return "发送者：" + this.fromName + "    " + "接收者：" + this.toName + "    " +
+                this.date + "/n/r" + this.message+"/n/r";
     }
 }

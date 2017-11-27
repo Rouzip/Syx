@@ -1,11 +1,16 @@
 package com.CSU.Syx.control.api;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
-import javax.print.attribute.standard.MediaSize;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.CSU.Syx.model.Message;
+import com.CSU.Syx.modelRepository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +42,10 @@ public class RestControl {
     private String adminCookie;
 
     @Autowired
-    public UserRepository userRepository;
+    private UserRepository userRepository;
+
+    @Autowired
+    private MessageRepository messageRepository;
 
     /**
      * 启用bcrypt加密算法
@@ -216,5 +224,53 @@ public class RestControl {
         }
         response.put("isLogged",false);
         return response;
+    }
+
+    /**
+     * 返回文件，为聊天记录
+     * @param httpServletResponse 返回的回复
+     */
+    @GetMapping("/history")
+    public void getHistory(
+            @CookieValue("auth")String auth,
+            HttpServletResponse httpServletResponse){
+        // 设置必要的头
+        httpServletResponse.setHeader("content-type", "text/plain;charset=utf-8");
+        httpServletResponse.setContentType("application/plain");
+        httpServletResponse.setHeader("ContentDisposition","attachment;filename=history.txt");
+        // 用来记录下载文件的长度
+        long downloadLength = 0;
+
+        // 从在线的里面查询，发送对应的人的历史记录
+        for (Map.Entry entry:alives.entrySet()){
+            if (auth.equals(entry.getValue())){
+                List<Message> history = messageRepository.findByFromNameOrToNameOrderByDateAsc(entry.getKey().toString(),entry.getKey().toString());
+                try {
+                    // 创建临时文件，储存聊天记录
+                    String historyName = "history"+new Random().nextInt();
+                    File tmp = File.createTempFile(historyName,".txt");
+                    tmp.deleteOnExit();
+                    BufferedWriter fileWriter = new BufferedWriter(new FileWriter(tmp));
+                    for (Message msg:history){
+                        fileWriter.write(msg.toString());
+                    }
+                    fileWriter.close();
+
+                    // 创建文件流，读取临时文件
+                    InputStream inputStream = new FileInputStream(tmp.getAbsolutePath());
+                    OutputStream os = httpServletResponse.getOutputStream();
+                    int length;
+                    byte[] b = new byte[2048];
+                    while((length = inputStream.read(b))>0){
+                        os.write(b,0,length);
+                        downloadLength+=b.length;
+                    }
+                    os.close();
+                    inputStream.close();
+                } catch (IOException io){
+                    io.printStackTrace();
+                }
+            }
+        }
     }
 }
