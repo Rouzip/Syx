@@ -114,6 +114,7 @@ public class SocketHandler implements WebSocketHandler {
             return;
         }
         String originText = webSocketMessage.getPayload().toString();
+        System.out.println(originText);
         // 解码消息记录
         MessageTrans msg = new Gson().fromJson(originText, MessageTrans.class);
         User fromUser = userRepository.findUserById(msg.getFromName());

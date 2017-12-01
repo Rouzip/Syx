@@ -150,10 +150,13 @@ public class RestControl {
      * @return 返回结果列表
      */
     @PostMapping("/login")
-    public Map login(@RequestParam("name") String name,
+    public Map login(@RequestParam("username") String name,
                      @RequestParam("password") String password,
                      HttpServletResponse httpServletResponse) {
+        System.out.println(123);
         Map response = new HashMap(5);
+        System.out.println(name);
+        System.out.println(password);
         User user = userRepository.findUserByName(name);
         try {
             boolean ifCan = passwordEncoder.matches(user.getPassword(), password);
