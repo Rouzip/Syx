@@ -21,6 +21,10 @@ public class Message {
     private String fromName;
     private String message;
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setDate(Date time) {
         this.date = time;
     }
@@ -40,6 +44,6 @@ public class Message {
     @Override
     public String toString() {
         return "发送者：" + this.fromName + "    " + "接收者：" + this.toName + "    " +
-                this.date + "/n/r" + this.message+"/n/r";
+                this.date + "/n/r" + this.message + "/n/r";
     }
 }

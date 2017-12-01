@@ -34,7 +34,7 @@ public class SocketHandler implements WebSocketHandler {
     /**
      * 记录uid和session对应的map，权限是写死在数据库之中的
      */
-    private static Map<String, WebSocketSession> userSessionMap;
+    public static Map<String, WebSocketSession> userSessionMap;
     /**
      * 将用户和UID对应起来，在我们的预想里面只是方便提供用户list
      */
@@ -58,18 +58,20 @@ public class SocketHandler implements WebSocketHandler {
      * @param webSocketSession 接受webSocketSession作为参数
      * @throws Exception 抛出所有异常
      */
+
+
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
-        String uid = (String) webSocketSession.getAttributes().get("uid");
-        // 从数据库进行检索，后边异常是针对匿名用户的
-        User user = userRepository.findUserById(uid);
-        // 正常用户可以获得名字，匿名用户抛出异常单独设置名字
-        try {
-            String name = user.getName();
-            userSessionMap.put(uid,webSocketSession);
-        } catch (NullPointerException e) {
-            userSessionMap.put(uid,webSocketSession);
-        }
+        userSessionMap.put("",webSocketSession);
+//        String sid = UUID.randomUUID().toString();
+//        webSocketSession.sendMessage(new TextMessage(sid));
+//        // 正常用户可以获得名字，匿名用户抛出异常单独设置名字
+//        userSessionMap.put(sid,webSocketSession);
+//        try {
+//            userSessionMap.put(sid,webSocketSession);
+//        } catch (NullPointerException e) {
+//            userSessionMap.put(sid,webSocketSession);
+//        }
     }
 
     /**
@@ -114,22 +116,37 @@ public class SocketHandler implements WebSocketHandler {
             return;
         }
         String originText = webSocketMessage.getPayload().toString();
+        for (Map.Entry entry:userSessionMap.entrySet()){
+            if (entry.getKey().equals("")){
+                userSessionMap.remove("");
+                userSessionMap.put(originText,webSocketSession);
+                return;
+            }
+        }
+
         System.out.println(originText);
         // 解码消息记录
         MessageTrans msg = new Gson().fromJson(originText, MessageTrans.class);
-        User fromUser = userRepository.findUserById(msg.getFromName());
-        User toUser = userRepository.findUserById(msg.getToName());
+
+
         String text = msg.getText();
         Date date = new Date();
-        // 构建存储的聊天记录
-        Message history = new Message();
-        history.setDate(date);
-        history.setFromName(fromUser.getName());
-        history.setToName(toUser.getName());
-        history.setMessage(text);
-        messageRepository.save(history);
+        try{
+            User toUser = userRepository.findUserById(msg.getToName());
+            // 构建存储的聊天记录
+            Message history = new Message();
+            history.setId(System.currentTimeMillis());
+            history.setDate(date);
+            history.setFromName(msg.getFromName());
+            history.setToName(toUser.getName());
+            history.setMessage(text);
+            messageRepository.save(history);
+        }catch (NullPointerException Null){
+            System.out.println("no");
+        }
         // 将消息发送到相对应的用户那里
-        String toUid = NameToUid.get(toUser.getName());
+        String toUid = msg.getToName();
+        System.out.println(toUid);
         TextMessage textMessage = new TextMessage(new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(msg));
         this.sendMessageToUser(toUid, textMessage);
     }
@@ -148,12 +165,12 @@ public class SocketHandler implements WebSocketHandler {
             if (webSocketSession.equals(entry.getValue())) {
                 String uid = (String) entry.getKey();
                 userSessionMap.remove(uid);
-                // 从name 和 uid映射中删除
-                for (Map.Entry e : NameToUid.entrySet()) {
-                    if (uid.equals(e.getValue())) {
-                        NameToUid.remove(e.getKey());
-                    }
-                }
+//                // 从name 和 uid映射中删除
+//                for (Map.Entry e : NameToUid.entrySet()) {
+//                    if (uid.equals(e.getValue())) {
+//                        NameToUid.remove(e.getKey());
+//                    }
+//                }
                 System.out.println("remove the session in the map");
                 break;
             }
@@ -181,6 +198,9 @@ public class SocketHandler implements WebSocketHandler {
      * @throws IOException 抛出所有异常
      */
     public void sendMessageToUser(String uid, TextMessage message) throws IOException {
+        for (Map.Entry entry:userSessionMap.entrySet()){
+            System.out.println(entry.getKey());
+        }
         WebSocketSession session = userSessionMap.get(uid);
         if (session.isOpen() && session != null) {
             session.sendMessage(message);

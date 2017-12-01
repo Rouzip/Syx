@@ -1,22 +1,30 @@
 package com.CSU.Syx.control.api;
 
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.security.Principal;
 import java.util.*;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.CSU.Syx.model.Message;
-import com.CSU.Syx.modelRepository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import com.CSU.Syx.model.Message;
+import com.CSU.Syx.modelRepository.MessageRepository;
 import com.CSU.Syx.model.User;
 import com.CSU.Syx.modelRepository.UserRepository;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketExtension;
+import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 import static com.CSU.Syx.configuration.websocketConfig.SocketHandler.NameToUid;
 import static com.CSU.Syx.configuration.websocketConfig.SocketHandler.admin;
+import static com.CSU.Syx.configuration.websocketConfig.SocketHandler.userSessionMap;
 
 
 /**
@@ -56,28 +64,44 @@ public class RestControl {
      * @return Map name uid列表
      */
     @GetMapping("/onlineList")
-    public Map userList(@CookieValue(value = "auth",defaultValue = "") String auth) {
-        Map userList = new HashMap(10);
+    public Map userList(@CookieValue(value = "auth", defaultValue = "") String auth) {
+        List users = new ArrayList(100);
+        Map response = new HashMap(1);
         if (auth.equals(adminCookie)) {
             // 如果是admin，返回的列表没有自己
             for (Map.Entry entry : NameToUid.entrySet()) {
+                Map tmp = new HashMap(3);
                 // 不是admin的添加到返回列表
                 if (!entry.getKey().equals("admin")) {
-                    userList.put(entry.getKey(), entry.getValue());
+                    User user = userRepository.findUserByName((String) entry.getKey());
+                    try {
+                        tmp.put("email", user.getEmail());
+                    } catch (NullPointerException Null) {
+                        tmp.put("email", "");
+                    }
+                    tmp.put("name", ((String) entry.getKey()).substring(0, 9));
+                    tmp.put("uid", entry.getValue());
                 }
+                users.add(tmp);
+
+
             }
         } else {
-            for (Map.Entry entry:alives.entrySet()){
-                if (entry.getValue().equals(auth)){
+            for (Map.Entry entry : alives.entrySet()) {
+                Map tmp = new HashMap(3);
+                if (entry.getValue().equals(auth) || entry.getValue().equals("null")) {
                     // 如果是普通用户，返回的只有admin和其uuid
-                    userList.put("admin", admin.getId());
-                    return userList;
+                    tmp.put("email", "rouzipking@gmail.com");
+                    tmp.put("uid", admin.getId());
+                    tmp.put("name", "admin");
+                    users.add(tmp);
+                    response.put("users", users);
+                    return response;
                 }
             }
-            // 对于错误的cookie返回错误
-            userList.put("msg","未登陆或错误cookie");
         }
-        return userList;
+        response.put("users", users);
+        return response;
     }
 
     /**
@@ -88,10 +112,13 @@ public class RestControl {
         String uid = UUID.randomUUID().toString();
         String name = "匿名用户" + uid;
         NameToUid.put(name, uid);
-        Map response = new HashMap();
+
+        alives.put(name, "null");
+        Map response = new HashMap(1);
         response.put("uid", uid);
         return response;
     }
+
     /**
      * 注册用户，具体协议实现见api文档
      *
@@ -104,7 +131,6 @@ public class RestControl {
     public Map signUp(@RequestParam(value = "username") String userName,
                       @RequestParam(value = "password") String password,
                       @RequestParam(value = "email") String email,
-                      HttpServletRequest httpServletRequest,
                       HttpServletResponse httpServletResponse) {
         Map response = new HashMap(5);
         User user = userRepository.findUserByName(userName);
@@ -153,10 +179,7 @@ public class RestControl {
     public Map login(@RequestParam("username") String name,
                      @RequestParam("password") String password,
                      HttpServletResponse httpServletResponse) {
-        System.out.println(123);
         Map response = new HashMap(5);
-        System.out.println(name);
-        System.out.println(password);
         User user = userRepository.findUserByName(name);
         try {
             boolean ifCan = passwordEncoder.matches(user.getPassword(), password);
@@ -175,7 +198,7 @@ public class RestControl {
                     response.put("isAdmin", true);
                     String cookieValue = UUID.randomUUID().toString();
                     Cookie cookie = new Cookie("auth", cookieValue);
-                    alives.put("admin",cookieValue);
+                    alives.put("admin", cookieValue);
                     adminCookie = cookieValue;
                     httpServletResponse.addCookie(cookie);
                     NameToUid.put("admin", admin.getId());
@@ -215,55 +238,55 @@ public class RestControl {
      * 鉴权，即实现rememberme功能
      */
     @GetMapping("/auth")
-    public Map auth(@CookieValue("auth")String auth){
+    public Map auth(@CookieValue("auth") String auth) {
         Map response = new HashMap(4);
-        for (Map.Entry entry:alives.entrySet()){
-            if (entry.getValue().equals(auth)){
-                response.put("isLogged",true);
+        for (Map.Entry entry : alives.entrySet()) {
+            if (entry.getValue().equals(auth)) {
+                response.put("isLogged", true);
                 String userName = (String) entry.getKey();
-                response.put("uid",NameToUid.get(userName));
-                if (userName.equals("admin")){
-                    response.put("isAdmin",true);
-                    response.put("username","admin");
+                response.put("uid", NameToUid.get(userName));
+                if (userName.equals("admin")) {
+                    response.put("isAdmin", true);
+                    response.put("username", "admin");
                     return response;
-                }
-                else {
-                    response.put("isAdmin",false);
-                    response.put("username",userName);
+                } else {
+                    response.put("isAdmin", false);
+                    response.put("username", userName);
                     return response;
                 }
             }
         }
-        response.put("isLogged",false);
+        response.put("isLogged", false);
         return response;
     }
 
     /**
      * 返回文件，为聊天记录
+     *
      * @param httpServletResponse 返回的回复
      */
     @GetMapping("/history")
     public void getHistory(
-            @CookieValue("auth")String auth,
-            HttpServletResponse httpServletResponse){
+            @CookieValue("auth") String auth,
+            HttpServletResponse httpServletResponse) {
         // 设置必要的头
         httpServletResponse.setHeader("content-type", "text/plain;charset=utf-8");
         httpServletResponse.setContentType("application/plain");
-        httpServletResponse.setHeader("ContentDisposition","attachment;filename=history.txt");
+        httpServletResponse.setHeader("ContentDisposition", "attachment;filename=history.txt");
         // 用来记录下载文件的长度
         long downloadLength = 0;
 
         // 从在线的里面查询，发送对应的人的历史记录
-        for (Map.Entry entry:alives.entrySet()){
-            if (auth.equals(entry.getValue())){
-                List<Message> history = messageRepository.findByFromNameOrToNameOrderByDateAsc(entry.getKey().toString(),entry.getKey().toString());
+        for (Map.Entry entry : alives.entrySet()) {
+            if (auth.equals(entry.getValue())) {
+                List<Message> history = messageRepository.findByFromNameOrToNameOrderByDateAsc(entry.getKey().toString(), entry.getKey().toString());
                 try {
                     // 创建临时文件，储存聊天记录
-                    String historyName = "history"+new Random().nextInt();
-                    File tmp = File.createTempFile(historyName,".txt");
+                    String historyName = "history" + new Random().nextInt();
+                    File tmp = File.createTempFile(historyName, ".txt");
                     tmp.deleteOnExit();
                     BufferedWriter fileWriter = new BufferedWriter(new FileWriter(tmp));
-                    for (Message msg:history){
+                    for (Message msg : history) {
                         fileWriter.write(msg.toString());
                     }
                     fileWriter.close();
@@ -273,13 +296,13 @@ public class RestControl {
                     OutputStream os = httpServletResponse.getOutputStream();
                     int length;
                     byte[] b = new byte[2048];
-                    while((length = inputStream.read(b))>0){
-                        os.write(b,0,length);
-                        downloadLength+=b.length;
+                    while ((length = inputStream.read(b)) > 0) {
+                        os.write(b, 0, length);
+                        downloadLength += b.length;
                     }
                     os.close();
                     inputStream.close();
-                } catch (IOException io){
+                } catch (IOException io) {
                     io.printStackTrace();
                 }
             }

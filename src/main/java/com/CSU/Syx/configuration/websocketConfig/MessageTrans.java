@@ -10,7 +10,6 @@ import java.util.Date;
 public class MessageTrans {
     private String fromName;
     private String toName;
-    private Date time;
     private String text;
 
     public String getToName(){
@@ -23,9 +22,5 @@ public class MessageTrans {
 
     public String getText(){
         return this.text;
-    }
-
-    public Date getTime(){
-        return this.time;
     }
 }
