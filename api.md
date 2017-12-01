@@ -279,3 +279,14 @@ userSessionMap：每次建立连接会被增加到这里面，断开连接就从
 NameToUid：与userSessionMap同时进行维护，建立连接的时候添加到这里面
 
 alives：每次signup或者login时候添加，logout删除
+
+```sql
+insert into users values("4c4b716b-dbc3-47fe-b750-95dfee776647",
+                        "rouzipking@gamil.com",
+                        "admin",
+                        "123",
+                        "admin");
+```
+
+
+

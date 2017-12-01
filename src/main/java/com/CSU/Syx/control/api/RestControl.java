@@ -1,9 +1,6 @@
 package com.CSU.Syx.control.api;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -58,8 +55,8 @@ public class RestControl {
      *
      * @return Map name uid列表
      */
-    @GetMapping("/userlist")
-    public Map userList(@CookieValue(value = "auth") String auth) {
+    @GetMapping("/onlineList")
+    public Map userList(@CookieValue(value = "auth",defaultValue = "") String auth) {
         Map userList = new HashMap(10);
         if (auth.equals(adminCookie)) {
             // 如果是admin，返回的列表没有自己
@@ -83,6 +80,18 @@ public class RestControl {
         return userList;
     }
 
+    /**
+     *
+     */
+    @GetMapping("/anonymous")
+    public Map anonymous() {
+        String uid = UUID.randomUUID().toString();
+        String name = "匿名用户" + uid;
+        NameToUid.put(name, uid);
+        Map response = new HashMap();
+        response.put("uid", uid);
+        return response;
+    }
     /**
      * 注册用户，具体协议实现见api文档
      *

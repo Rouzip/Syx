@@ -185,21 +185,4 @@ public class SocketHandler implements WebSocketHandler {
             session.sendMessage(message);
         }
     }
-
-//    /**
-//     * 判断是否为admin，鉴权使用
-//     *
-//     * @param name 用户名字
-//     * @return 若为admin则true，否则false
-//     */
-//    public boolean isAdmin(String name) {
-//        User user = userRepository.findUserByName(name);
-//        Set<Role> roles = user.getRoles();
-//        for (Role role : roles) {
-//            if ("admin".equals(role.getRole())) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 }
