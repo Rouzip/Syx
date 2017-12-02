@@ -94,7 +94,7 @@ public class RestControl {
         } else {
             for (Map.Entry entry : alives.entrySet()) {
                 Map tmp = new HashMap(3);
-                if (entry.getValue().equals(auth) || entry.getValue().equals("null")) {
+                if (entry.getValue().equals(auth)) {
                     // 如果是普通用户，返回的只有admin和其uuid1
                     tmp.put("email", "rouzipking@gmail.com");
                     tmp.put("uid", admin.getId());
@@ -113,12 +113,17 @@ public class RestControl {
      *
      */
     @GetMapping("/anonymous")
-    public Map anonymous() {
+    public Map anonymous(HttpServletResponse httpServletResponse) {
         String uid = UUID.randomUUID().toString();
         String name = "匿名用户" + uid;
         NameToUid.put(name, uid);
 
-        alives.put(name, "null"/*UUID.randomUUID().toString()*/);
+        String cookeValue = UUID.randomUUID().toString();
+        Cookie cookie = new Cookie("auth", cookeValue);
+        cookie.setPath("/");
+        httpServletResponse.addCookie(cookie);
+
+        alives.put(name, cookeValue);
         Map response = new HashMap(1);
         response.put("uid", uid);
         return response;
