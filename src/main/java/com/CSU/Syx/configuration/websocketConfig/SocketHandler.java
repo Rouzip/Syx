@@ -165,12 +165,11 @@ public class SocketHandler implements WebSocketHandler {
             if (webSocketSession.equals(entry.getValue())) {
                 String uid = (String) entry.getKey();
                 userSessionMap.remove(uid);
-//                // 从name 和 uid映射中删除
-//                for (Map.Entry e : NameToUid.entrySet()) {
-//                    if (uid.equals(e.getValue())) {
-//                        NameToUid.remove(e.getKey());
-//                    }
-//                }
+                for (Map.Entry e:NameToUid.entrySet()){
+                    if (e.getKey().toString().substring(0,3).equals("匿名用户")){
+                        userSessionMap.remove(entry.getKey());
+                    }
+                }
                 System.out.println("remove the session in the map");
                 break;
             }
