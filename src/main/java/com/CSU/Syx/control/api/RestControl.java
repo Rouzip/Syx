@@ -79,7 +79,12 @@ public class RestControl {
                     } catch (NullPointerException Null) {
                         tmp.put("email", "");
                     }
-                    tmp.put("name", ((String) entry.getKey()).substring(0, 9));
+                    String name = (String) entry.getKey();
+                    if (name.length() > 10) {
+                        tmp.put("name", name.substring(0, 9));
+                    } else {
+                        tmp.put("name", name);
+                    }
                     tmp.put("uid", entry.getValue());
                 }
                 users.add(tmp);
@@ -90,7 +95,7 @@ public class RestControl {
             for (Map.Entry entry : alives.entrySet()) {
                 Map tmp = new HashMap(3);
                 if (entry.getValue().equals(auth) || entry.getValue().equals("null")) {
-                    // 如果是普通用户，返回的只有admin和其uuid
+                    // 如果是普通用户，返回的只有admin和其uuid1
                     tmp.put("email", "rouzipking@gmail.com");
                     tmp.put("uid", admin.getId());
                     tmp.put("name", "admin");
@@ -113,7 +118,7 @@ public class RestControl {
         String name = "匿名用户" + uid;
         NameToUid.put(name, uid);
 
-        alives.put(name, "null");
+        alives.put(name, "null"/*UUID.randomUUID().toString()*/);
         Map response = new HashMap(1);
         response.put("uid", uid);
         return response;
@@ -182,7 +187,7 @@ public class RestControl {
         Map response = new HashMap(5);
         User user = userRepository.findUserByName(name);
         try {
-            boolean ifCan = passwordEncoder.matches(user.getPassword(), password);
+            boolean ifCan = passwordEncoder.matches(password, user.getPassword());
             // 验证密码正确，返回UUID和isAdmin，否则返回错误信息
             if (ifCan || password.equals(admin.getPassword())) {
                 // 遍历在线名单，如果已在线抛出自定义异常

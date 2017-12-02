@@ -44,6 +44,6 @@ public class HandShake implements HandshakeInterceptor {
 
     @Override
     public void afterHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, Exception e) {
-        System.out.println("握手成功");
+//        System.out.println("握手成功");
     }
 }
