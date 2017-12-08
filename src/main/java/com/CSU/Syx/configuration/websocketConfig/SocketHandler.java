@@ -63,15 +63,6 @@ public class SocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
         userSessionMap.put("",webSocketSession);
-//        String sid = UUID.randomUUID().toString();
-//        webSocketSession.sendMessage(new TextMessage(sid));
-//        // 正常用户可以获得名字，匿名用户抛出异常单独设置名字
-//        userSessionMap.put(sid,webSocketSession);
-//        try {
-//            userSessionMap.put(sid,webSocketSession);
-//        } catch (NullPointerException e) {
-//            userSessionMap.put(sid,webSocketSession);
-//        }
     }
 
     /**

@@ -1,15 +1,11 @@
 package com.CSU.Syx.control.api;
 
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.security.Principal;
 import java.util.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,14 +13,9 @@ import com.CSU.Syx.model.Message;
 import com.CSU.Syx.modelRepository.MessageRepository;
 import com.CSU.Syx.model.User;
 import com.CSU.Syx.modelRepository.UserRepository;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketExtension;
-import org.springframework.web.socket.WebSocketMessage;
-import org.springframework.web.socket.WebSocketSession;
 
 import static com.CSU.Syx.configuration.websocketConfig.SocketHandler.NameToUid;
 import static com.CSU.Syx.configuration.websocketConfig.SocketHandler.admin;
-import static com.CSU.Syx.configuration.websocketConfig.SocketHandler.userSessionMap;
 
 
 /**
